@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Ista Zahn, Daina Bouquin" />
+<meta name="author" content="Ista Zahn" />
 
 
 <title>Retrieving Data From The Web</title>
@@ -243,7 +243,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Retrieving Data From The Web</h1>
-<h4 class="author"><em>Ista Zahn, Daina Bouquin</em></h4>
+<h4 class="author"><em>Ista Zahn</em></h4>
 
 </div>
 
@@ -264,11 +264,8 @@ div.tocify {
 <li>download and extract the workshop materials from <a href="https://github.com/izahn/R_retrieving_data/archive/retrieving_data_v1.zip" class="uri">https://github.com/izahn/R_retrieving_data/archive/retrieving_data_v1.zip</a></li>
 </ul>
 <p>During the workshop you must have a laptop with the above software installed and a working internet connection.</p>
-<!-- The lesson notes are included in the download link above. You can also -->
-<!-- view the lesson notes at -->
-<!-- <https://rawgit.com/izahn/R-data-cleaning/master/dataCleaning.html> -->
-<!-- A github repository containing the workshop materials is -->
-<!-- available <https://github.com/izahn/R-data-cleaning>. -->
+<p>The lesson notes are included in the download link above. You can also view the lesson notes at <a href="https://rawgit.com/izahn/R_retrieving_data/master/retrievingOnlineData.html" class="uri">https://rawgit.com/izahn/R_retrieving_data/master/retrievingOnlineData.html</a></p>
+<p>A github repository containing the workshop materials is available <a href="https://github.com/izahn/R_retrieving_data" class="uri">https://github.com/izahn/R_retrieving_data</a>.</p>
 <p>This is an intermediate/advanced R course appropriate for those with basic knowledge of R. If you need a refresher we recommend the <a href="https://swcarpentry.github.io/r-novice-gapminder/01-rstudio-intro/">Software Carpentry Introductory R material</a>.</p>
 </div>
 <div id="example-project-overview" class="section level2">
@@ -351,7 +348,7 @@ fr.monthly &lt;-<span class="st"> </span><span class="kw">GET</span>(fr.url,
 ## [1] &quot;nginx/1.10.0 (Ubuntu)&quot;
 ## 
 ## $date
-## [1] &quot;Tue, 17 Jan 2017 04:30:27 GMT&quot;
+## [1] &quot;Tue, 17 Jan 2017 17:10:09 GMT&quot;
 ## 
 ## $`content-type`
 ## [1] &quot;application/json; charset=utf-8&quot;
@@ -363,7 +360,7 @@ fr.monthly &lt;-<span class="st"> </span><span class="kw">GET</span>(fr.url,
 ## [1] &quot;keep-alive&quot;
 ## 
 ## $`x-runtime`
-## [1] &quot;178&quot;
+## [1] &quot;181&quot;
 ## 
 ## $etag
 ## [1] &quot;\&quot;c3286e292081b0f77f94a04763108a95\&quot;&quot;
@@ -375,10 +372,10 @@ fr.monthly &lt;-<span class="st"> </span><span class="kw">GET</span>(fr.url,
 ## [1] &quot;200 OK&quot;
 ## 
 ## $`x-varnish`
-## [1] &quot;681513979 669896734&quot;
+## [1] &quot;688978219 690392285&quot;
 ## 
 ## $age
-## [1] &quot;1&quot;
+## [1] &quot;46&quot;
 ## 
 ## $via
 ## [1] &quot;1.1 varnish-v4&quot;
@@ -393,11 +390,6 @@ fr.monthly &lt;-<span class="st"> </span><span class="kw">GET</span>(fr.url,
 ## [1] &quot;insensitive&quot; &quot;list&quot;</code></pre>
 <p>indicates that the response is in <em>application/json</em> format. The <code>jsonlite</code> R package can be used to convert JSON to a native R data structure.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(jsonlite)</code></pre></div>
-<pre><code>## 
-## Attaching package: 'jsonlite'</code></pre>
-<pre><code>## The following object is masked from 'package:purrr':
-## 
-##     flatten</code></pre>
 <p>The specific structure of the <em>facets</em> endpoint is not documented, so we’ll just have to take a look.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## extract and examine content from the response
 fr.monthly.content &lt;-<span class="st"> </span><span class="kw">content</span>(fr.monthly, <span class="dt">as =</span> <span class="st">&quot;text&quot;</span>)
@@ -416,22 +408,17 @@ fr.monthly.content &lt;-<span class="st"> </span><span class="kw">fromJSON</span
 <pre><code>## 'data.frame':    277 obs. of  2 variables:
 ##  $ count: chr  &quot;2270&quot; &quot;2513&quot; &quot;3256&quot; &quot;2620&quot; ...
 ##  $ name : chr  &quot;January 1994&quot; &quot;February 1994&quot; &quot;March 1994&quot; &quot;April 1994&quot; ...</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(lubridate)</code></pre></div>
-<pre><code>## 
-## Attaching package: 'lubridate'</code></pre>
-<pre><code>## The following object is masked from 'package:base':
-## 
-##     date</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fr.monthly.content$name &lt;-<span class="st"> </span><span class="kw">dmy</span>(<span class="kw">str_c</span>(<span class="st">&quot;01&quot;</span>, fr.monthly.content$name, <span class="dt">sep =</span> <span class="st">&quot; &quot;</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(lubridate)
+<span class="kw">library</span>(stringr)
+
+fr.monthly.content$name &lt;-<span class="st"> </span><span class="kw">dmy</span>(<span class="kw">str_c</span>(<span class="st">&quot;01&quot;</span>, fr.monthly.content$name, <span class="dt">sep =</span> <span class="st">&quot; &quot;</span>))
 fr.monthly.content$count &lt;-<span class="st"> </span><span class="kw">as.integer</span>(<span class="kw">as.character</span>(fr.monthly.content$count))
 <span class="kw">str</span>(fr.monthly.content)</code></pre></div>
 <pre><code>## 'data.frame':    277 obs. of  2 variables:
 ##  $ count: int  2270 2513 3256 2620 3000 2891 2668 3084 2823 2756 ...
 ##  $ name : Date, format: &quot;1994-01-01&quot; &quot;1994-02-01&quot; ...</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)</code></pre></div>
-<pre><code>## Stackoverflow is a great place to get help:
-## http://stackoverflow.com/tags/ggplot2.</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(fr.monthly.content, <span class="kw">aes</span>(<span class="dt">x =</span> name, <span class="dt">y =</span> count)) +
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
+<span class="kw">ggplot</span>(fr.monthly.content, <span class="kw">aes</span>(<span class="dt">x =</span> name, <span class="dt">y =</span> count)) +
 <span class="st">    </span><span class="kw">geom_line</span>() +
 <span class="st">    </span><span class="kw">scale_x_date</span>(<span class="dt">date_breaks =</span> <span class="st">&quot;1 year&quot;</span>) +
 <span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">60</span>, <span class="dt">hjust =</span> <span class="dv">1</span>))</code></pre></div>
@@ -488,6 +475,7 @@ fr.agency<span class="fl">.2015</span>.content &lt;-<span class="st"> </span>fr.
 <p>If no bulk download or API is available (or the available API is too restrictive) you may have to resort to web scraping. Web scraping is similar to working with an API, except that there is no documentation, and the response will almost always to an html document.</p>
 <p>We could use the <code>httr</code> package for web scraping (and I sometimes do) but the <code>rvest</code> package contains some convenience functions to make it easier.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rvest)</code></pre></div>
+<pre><code>## Loading required package: xml2</code></pre>
 <p>One important thing to keep in mind is that the http clients in R do not include a javascript engine. This means that you are fine as long as the required logic is executed server-side. If required logic is expected to be evaluated client-side by evaluating javascript your life will be difficult. Your options in that case are a) give up, b) use a local javascript interpreter like PhantomJS, c) write R code to do whatever the javascript is supposed to do, or d) use R to control a web browser (using e.g., the <code>RSelenium</code> package) instead of interacting directly with the web service from R. None of the examples we’ll look at today require client-side javascript execution, but keep in mind that real-world web scraping may be significantly more complicated because of this.</p>
 <div id="web-scraping-example" class="section level2">
 <h2>Web scraping example</h2>

@@ -1,6 +1,6 @@
 ---
 title: "Retrieving Data From The Web"
-author: "Ista Zahn, Daina Bouquin"
+author: "Ista Zahn"
 output: 
   html_document:
     highlight: tango
@@ -36,16 +36,17 @@ Prior to the workshop you should:
 
 During the workshop you must have a laptop with the above software installed and a working internet connection.
 
-<!-- The lesson notes are included in the download link above. You can also -->
-<!-- view the lesson notes at -->
-<!-- <https://rawgit.com/izahn/R-data-cleaning/master/dataCleaning.html> -->
+The lesson notes are included in the download link above. You can also
+view the lesson notes at
+<https://rawgit.com/izahn/R_retrieving_data/master/retrievingOnlineData.html>
 
-<!-- A github repository containing the workshop materials is -->
-<!-- available <https://github.com/izahn/R-data-cleaning>. -->
+A github repository containing the workshop materials is
+available <https://github.com/izahn/R_retrieving_data>.
 
 This is an intermediate/advanced R course appropriate for those with
 basic knowledge of R. If you need a refresher we recommend the
 [Software Carpentry Introductory R material](https://swcarpentry.github.io/r-novice-gapminder/01-rstudio-intro/).
+
 
 Example project overview
 ------------------------
@@ -80,7 +81,7 @@ use the API.
 Let's get started by attaching the `httr` package which provides a
 basic http client in R.
 
-```{r}
+```{r attach R http client package}
 library(httr) # for sending GET and POST requests, useful for API's
 library(purrr) # for iteration a list manipulation
 ```
@@ -151,7 +152,7 @@ or faceted by month at
 Let's try asking for monthly facets, leaving the remaining parameters at their default
 values.
 
-```{r}
+```{r calling the federal register API with default parameters}
 fr.url <- "https://www.federalregister.gov"
 fr.doc.api <- "api/v1"
 
@@ -168,7 +169,7 @@ through the `GET` function. Since GET passes parameters via the URL we
 can use the `modify_url` function to check that we are constructing
 the appropriate URL before submitting the request with `GET`.
 
-```{r}
+```{r examining the generated URL}
 modify_url(fr.url,
                 path = c(fr.doc.api,
                          "documents",
@@ -192,7 +193,7 @@ and process the response.
 
 We can check the status of the response using the `http_status` function.
 
-```{r}
+```{r checking the status of the response}
 http_status(fr.monthly)
 ```
 If the status is other than "Success", check the URL you are
@@ -206,21 +207,21 @@ Javascript Object Notation (JSON). If the documentation does not
 indicate what format the endpoint returns we can inspect the *header*
 of the response to see if the format is indicated there.
 
-```{r}
+```{r examine the headers of the response}
 headers(fr.monthly)
 ```
 indicates that the response is in *application/json* format. The
 `jsonlite` R package can be used to convert JSON to a native R data
 structure.
 
-```{r}
+```{r use the jsonlite package to convert json to R lists}
 library(jsonlite)
 ```
 
 The specific structure of the *facets* endpoint is not documented, so
 we'll just have to take a look. 
 
-```R
+```{r working with the contents of the response}
 ## extract and examine content from the response
 fr.monthly.content <- content(fr.monthly, as = "text")
 cat(str_sub(fr.monthly.content, 1, 100), "\n")
@@ -242,18 +243,19 @@ to get the content of the response as an R list.
 
 Now we format the data into a convenient form and plot it.
 
-```{r}
+```{r arranging the data for analysis}
 fr.monthly.content <- as.data.frame(do.call(rbind, map(fr.monthly.content, unlist)), stringsAsFactors = FALSE)
 str(fr.monthly.content)
 
 library(lubridate)
+library(stringr)
 
 fr.monthly.content$name <- dmy(str_c("01", fr.monthly.content$name, sep = " "))
 fr.monthly.content$count <- as.integer(as.character(fr.monthly.content$count))
 str(fr.monthly.content)
 ```
 
-```{r}
+```{r ploting retrieved values}
 library(ggplot2)
 ggplot(fr.monthly.content, aes(x = name, y = count)) +
     geom_line() +
@@ -279,7 +281,7 @@ we'll facet on *agency*, request counts only for 2015 and only for
 notices. 
 
 
-```{r}
+```{r passing parameters in the query string}
 ## first check the url our settings will construct
 modify_url(fr.url,
            path = c(fr.doc.api,
@@ -349,7 +351,7 @@ and the response will almost always to an html document.
 We could use the `httr` package for web scraping (and I sometimes do)
 but the `rvest` package contains some convenience functions to make it easier.
 
-```{r}
+```{r use the rvest package for reading and processing html}
 library(rvest)
 ```
 
@@ -380,7 +382,7 @@ that we can use to practice web scraping.
 The first step is to read and parse the starting page at
 <https://www.gpo.gov/fdsys/bulkdata/FR>.
 
-```{r}
+```{r read the starting page and parse it into a form R can work with}
 data.page <- read_html("https://www.gpo.gov/fdsys/bulkdata/FR")
 ```
 
@@ -402,7 +404,7 @@ it. We can filter out the ones we don't want later.
 Now that we know how to identify the element we want, we can extract
 it using the `html_nodes`
 
-```{r}
+```{r extract links from the bulkdata node}
 links.table <- html_nodes(data.page, css = "#bulkdata > table")
 links <- html_nodes(links.table, css = "a")
 ```
@@ -410,7 +412,7 @@ links <- html_nodes(links.table, css = "a")
 Now that we've extracted the anchor elements we can process them and
 extract the `href` attributes.
 
-```{r}
+```{r extract all the href attributes from the list of anchor nodes}
 links <- map_chr(links, html_attr, name = "href")
 ```
 
@@ -418,7 +420,7 @@ We now have the links we want, but we also have some that we don't
 want (the first and last). We can filter these out using regular
 expressions.
 
-```{r}
+```{r filter the strings to retain only data links}
 library(stringr)
 links <- str_subset(links, "[0-9]$")
 links
@@ -428,7 +430,7 @@ Finally, we need to append these extracted links to the url they are
 relative to. 
 
 
-```{r}
+```{r prepend the base url to the extracted (relative) links}
 links <- str_c("https://www.gpo.gov/fdsys", links, sep = "/")
 ```
 
@@ -441,7 +443,7 @@ to iterate over each link, extract that element, and extract the
 `href` attribute from it. Let's write a little function that does
 that, and test it out on the first link.
 
-```{r}
+```{r follow each page link and extract the download link}
 getDataLink <- function(url) {
     page <- read_html(url)
     anchor <- html_nodes(page, css = "#bulkdata > table > tr:nth-child(3) > td:nth-child(1) > a")
@@ -453,7 +455,7 @@ getDataLink(links[[1]])
 Now that we know how to extract the links, let's get them for all the
 years.
 
-```{r}
+```{r extract all the links and prepend the base URL}
 allDataLinks <- str_c("https://www.gpo.gov/fdsys", map_chr(links, getDataLink), sep = "/")
 ```
 The final step of course is to download the data. That part is easy,
