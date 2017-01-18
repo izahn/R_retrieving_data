@@ -23,7 +23,7 @@ retrieved from a web service or web page and assembled into a usable
 data set. This workshop will show you how to do that, using the httr
 and rvest packages in R.
 
-Prerequisites and Preparation
+Prerequisites and Preparation {.smaller}
 -----------------------------
 
 Prior to the workshop you should:
