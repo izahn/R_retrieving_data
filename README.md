@@ -1,14 +1,9 @@
 
-[Data Fest 2017](http://projects.iq.harvard.edu/datafest2017)
+[Data Fest 2018](http://projects.iq.harvard.edu/datafest2018)
 ============================================================
-Wednesday, Jan. 17, 1:00 -- 2:30
 
 Web Scraping and Web APIs
 ---------------------------------------------------------
-#### Ista Zahn
-
-Workshop description
---------------------
 
 Data is more plentiful and in many ways easier to acquire than ever.
 That doesn't always mean a perfectly cleaned and organized data set is
