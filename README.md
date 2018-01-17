@@ -19,7 +19,8 @@ Prior to the workshop you should:
 
 - install R from <https://cran.r-project.org/>
 - install RStudio from <https://www.rstudio.com/products/rstudio/download/#download>
-- install the the `httr` and `rvest` and `jsonlite` packages in R with 
+- install the the `httr` and `rvest` and `jsonlite` packages in R with
+
   `install.packages(c("httr", "rvest", "jsonlite"))`
 
 If you wish to follow along and try things yourself you should have a laptop 
